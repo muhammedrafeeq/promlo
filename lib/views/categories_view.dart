@@ -79,10 +79,10 @@ class _CategoriesViewState extends State<CategoriesView> {
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: isDesktop ? 3 : (isTablet ? 2 : 1),
+            crossAxisCount: isDesktop ? 3 : 2,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            childAspectRatio: 2.2,
+            childAspectRatio: isTablet ? 2.4 : 1.9,
             children: Category.values
                 .where((c) => c != Category.all)
                 .map((cat) {
@@ -674,7 +674,13 @@ class _CategoryDetailPageState extends State<_CategoryDetailPage> {
               padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 16),
               sliver: SliverGrid(
                 delegate: SliverChildBuilderDelegate(
-                  (_, i) => PromptCard(prompt: filtered[i]),
+                  (_, i) => PromptCard(
+                    prompt: filtered[i],
+                    onTap: () {
+                      Navigator.pop(context);
+                      provider.openPromptDetails(filtered[i]);
+                    },
+                  ),
                   childCount: filtered.length,
                 ),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

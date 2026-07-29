@@ -34,7 +34,7 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 80,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

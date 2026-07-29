@@ -24,7 +24,6 @@ class PromptDetailsView extends StatefulWidget {
 
 class _PromptDetailsViewState extends State<PromptDetailsView> {
   bool _isCopied = false;
-  bool _isFollowing = false;
   bool _liked = false;
   int _localLikes = 0;
   int _localViews = 0;
@@ -128,7 +127,7 @@ class _PromptDetailsViewState extends State<PromptDetailsView> {
         return StatefulBuilder(
           builder: (ctx, setS) {
             return Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 80),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -245,52 +244,43 @@ class _PromptDetailsViewState extends State<PromptDetailsView> {
           Column(
             children: [
               // TOP APP BAR
-              Container(
-                height: 56,
-                color: colors.surfaceContainerLow,
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.arrow_back_rounded, color: colors.onSurface),
-                      onPressed: widget.onBack,
-                      tooltip: 'Back',
-                    ),
-                    Expanded(
-                      child: Text(
-                        widget.prompt.title,
-                        style: GoogleFonts.sora(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: colors.onSurface,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+              Builder(builder: (context) {
+                final statusBar = MediaQuery.of(context).padding.top;
+                return Container(
+                  height: 56 + statusBar,
+                  color: colors.surfaceContainerLow,
+                  padding: EdgeInsets.only(top: statusBar),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back_rounded, color: colors.onSurface),
+                        onPressed: widget.onBack,
+                        tooltip: 'Back',
                       ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-                        color: isBookmarked ? colors.primary : colors.onSurfaceVariant,
-                      ),
-                      onPressed: () => _showBookmarkSheet(context, provider),
-                      tooltip: 'Save to collection',
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: OutlinedButton.icon(
-                        onPressed: _copyPromptToClipboard,
-                        icon: Icon(Icons.share_outlined, size: 16, color: colors.primary),
-                        label: Text('Share', style: TextStyle(color: colors.primary, fontSize: 13, fontWeight: FontWeight.w600)),
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: colors.primary.withValues(alpha: 0.4)),
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      Expanded(
+                        child: Text(
+                          widget.prompt.title,
+                          style: GoogleFonts.sora(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: colors.onSurface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                      IconButton(
+                        icon: Icon(
+                          isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                          color: isBookmarked ? colors.primary : colors.onSurfaceVariant,
+                        ),
+                        onPressed: () => _showBookmarkSheet(context, provider),
+                        tooltip: 'Save to collection',
+                      ),
+                    ],
+                  ),
+                );
+              }),
 
               // 2. SCROLLABLE BODY CONTENT
               Expanded(
@@ -474,28 +464,6 @@ class _PromptDetailsViewState extends State<PromptDetailsView> {
                     ],
                   ),
                 ],
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() => _isFollowing = !_isFollowing);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _isFollowing
-                      ? colors.surfaceContainerHigh
-                      : colors.primary,
-                  foregroundColor: _isFollowing
-                      ? colors.onSurface
-                      : colors.onPrimary,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
-                child: Text(
-                  _isFollowing ? 'Following' : 'Follow',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
               ),
             ],
           ),

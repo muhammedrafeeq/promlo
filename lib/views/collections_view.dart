@@ -241,7 +241,7 @@ class CollectionsView extends StatelessWidget {
                 color: colors.surfaceContainer,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
               ),
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 80),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
