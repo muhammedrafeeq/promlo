@@ -29,7 +29,7 @@ class CollectionsView extends StatelessWidget {
                 children: [
                   Text('Collections',
                       style: GoogleFonts.sora(
-                          fontSize: 26,
+                          fontSize: AppSizes.of(context).h1,
                           fontWeight: FontWeight.w800,
                           color: colors.onSurface)),
                   Text('Organise your favourite prompts',

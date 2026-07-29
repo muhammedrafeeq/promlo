@@ -210,7 +210,7 @@ class _TrendingViewState extends State<TrendingView> {
                               Text(
                                 'AI Prompt\nLibrary',
                                 style: GoogleFonts.sora(
-                                  fontSize: isDesktop ? 36 : (isTablet ? 28 : 26),
+                                  fontSize: isDesktop ? 36 : (isTablet ? 28 : AppSizes.of(context).h1),
                                   fontWeight: FontWeight.w800,
                                   color: colors.onSurface,
                                   height: 1.15,
@@ -222,10 +222,12 @@ class _TrendingViewState extends State<TrendingView> {
                               Text(
                                 'Explore hot and trending AI prompts for image, video, and webpage generation. Continuously tracking the latest models, with new prompts every day.',
                                 style: GoogleFonts.inter(
-                                  fontSize: isDesktop ? 15 : 13,
+                                  fontSize: isDesktop ? 15 : AppSizes.of(context).body,
                                   color: colors.onSurfaceVariant,
                                   height: 1.5,
                                 ),
+                                maxLines: 4,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
@@ -380,7 +382,7 @@ class _TrendingViewState extends State<TrendingView> {
                   Text(
                     'Trending Now',
                     style: GoogleFonts.sora(
-                      fontSize: 24,
+                      fontSize: AppSizes.of(context).h2,
                       fontWeight: FontWeight.w600,
                       color: colors.primary,
                     ),
@@ -771,7 +773,7 @@ class _StatBadge extends StatelessWidget {
             label,
             style: TextStyle(
               color: colors.primary,
-              fontSize: 10,
+              fontSize: AppSizes.of(context).caption,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.8,
             ),

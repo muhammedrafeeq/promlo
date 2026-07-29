@@ -177,6 +177,30 @@ class AppColors extends ThemeExtension<AppColors> {
   }
 }
 
+/// Responsive font/icon scale helper.
+/// Usage: final rs = AppSizes.of(context);  rs.h1  rs.body  rs.icon(24)
+class AppSizes {
+  final double screenWidth;
+
+  const AppSizes._(this.screenWidth);
+
+  static AppSizes of(BuildContext context) =>
+      AppSizes._(MediaQuery.of(context).size.width);
+
+  bool get isSmall => screenWidth < 360;   // e.g. iPhone SE 1st gen, Galaxy A01
+  bool get isMedium => screenWidth < 414;  // most phones
+
+  // Heading scale
+  double get h1 => isSmall ? 22 : 26;      // page titles
+  double get h2 => isSmall ? 18 : 22;      // section headings
+  double get h3 => isSmall ? 15 : 18;      // card titles / sub-headings
+  double get body => isSmall ? 13 : 14;    // body text
+  double get caption => isSmall ? 11 : 12; // captions / badges
+
+  // Icon scale
+  double icon(double base) => isSmall ? (base * 0.82).roundToDouble() : base;
+}
+
 class AppTheme {
   static ThemeData get darkTheme {
     final baseTextTheme = GoogleFonts.soraTextTheme();

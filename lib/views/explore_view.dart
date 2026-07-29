@@ -331,7 +331,7 @@ class _Header extends StatelessWidget {
                   Text(
                     'Explore Library',
                     style: GoogleFonts.sora(
-                      fontSize: 22,
+                      fontSize: AppSizes.of(context).h2,
                       fontWeight: FontWeight.w700,
                       color: colors.onSurface,
                     ),
@@ -339,9 +339,11 @@ class _Header extends StatelessWidget {
                   Text(
                     'Search across all community curated prompts',
                     style: GoogleFonts.inter(
-                      fontSize: 13,
+                      fontSize: AppSizes.of(context).body,
                       color: colors.onSurfaceVariant,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

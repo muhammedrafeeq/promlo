@@ -69,7 +69,7 @@ class _CategoriesViewState extends State<CategoriesView> {
           // Header
           Text('Categories',
               style: GoogleFonts.sora(
-                  fontSize: 26, fontWeight: FontWeight.w800, color: colors.onSurface)),
+                  fontSize: AppSizes.of(context).h1, fontWeight: FontWeight.w800, color: colors.onSurface)),
           const SizedBox(height: 4),
           Text('Browse prompts by type',
               style: GoogleFonts.inter(fontSize: 13, color: colors.onSurfaceVariant)),

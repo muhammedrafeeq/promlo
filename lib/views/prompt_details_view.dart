@@ -506,7 +506,7 @@ class _PromptDetailsViewState extends State<PromptDetailsView> {
         Text(
           widget.prompt.title,
           style: GoogleFonts.sora(
-            fontSize: 28,
+            fontSize: MediaQuery.of(context).size.width >= 1024 ? 28 : AppSizes.of(context).h1,
             fontWeight: FontWeight.bold,
             color: colors.primary,
           ),

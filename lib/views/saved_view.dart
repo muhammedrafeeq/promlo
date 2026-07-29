@@ -185,7 +185,7 @@ class _SavedViewState extends State<SavedView> {
                         Text(
                           'Saved Prompts',
                           style: GoogleFonts.sora(
-                            fontSize: 24,
+                            fontSize: AppSizes.of(context).h1,
                             fontWeight: FontWeight.w700,
                             color: colors.onSurface,
                           ),

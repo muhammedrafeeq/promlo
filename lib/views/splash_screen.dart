@@ -223,7 +223,7 @@ class _SplashScreenState extends State<SplashScreen>
                             Text(
                               'Promlo',
                               style: GoogleFonts.sora(
-                                fontSize: 36,
+                                fontSize: AppSizes.of(context).isSmall ? 28 : 36,
                                 fontWeight: FontWeight.w800,
                                 color: colors.onSurface,
                                 letterSpacing: -0.5,

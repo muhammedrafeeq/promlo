@@ -264,7 +264,7 @@ class PromptCard extends StatelessWidget {
                           tagText.toUpperCase(),
                           style: TextStyle(
                             color: _getCategoryBadgeText(colors, prompt.category, tagText),
-                            fontSize: 10,
+                            fontSize: AppSizes.of(context).caption,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.8,
                           ),
@@ -286,7 +286,7 @@ class PromptCard extends StatelessWidget {
                           prompt.model.displayName.toUpperCase(),
                           style: TextStyle(
                             color: colors.onPrimary,
-                            fontSize: 10,
+                            fontSize: AppSizes.of(context).caption,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.8,
                           ),
@@ -309,12 +309,12 @@ class PromptCard extends StatelessWidget {
                   Text(
                     prompt.title,
                     style: GoogleFonts.sora(
-                      fontSize: 16,
+                      fontSize: AppSizes.of(context).isSmall ? 14 : 16,
                       fontWeight: FontWeight.w600,
                       color: colors.onSurface,
                       height: 1.3,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 12),
@@ -350,11 +350,13 @@ class PromptCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 6),
                           ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 110),
+                            constraints: BoxConstraints(
+                              maxWidth: AppSizes.of(context).isSmall ? 80 : 110,
+                            ),
                             child: Text(
                               prompt.creator.name,
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: AppSizes.of(context).body,
                                 fontWeight: FontWeight.w600,
                                 color: colors.onSurfaceVariant.withValues(alpha: 0.9),
                               ),
@@ -386,7 +388,7 @@ class PromptCard extends StatelessWidget {
                                 Text(
                                   prompt.likesFormatted ?? '${prompt.likes}',
                                   style: TextStyle(
-                                    fontSize: 13,
+                                    fontSize: AppSizes.of(context).body,
                                     color: colors.onSurfaceVariant.withValues(alpha: 0.8),
                                   ),
                                 ),
@@ -407,7 +409,7 @@ class PromptCard extends StatelessWidget {
                               Text(
                                 prompt.viewsCount,
                                 style: TextStyle(
-                                  fontSize: 13,
+                                  fontSize: AppSizes.of(context).body,
                                   color: colors.onSurfaceVariant.withValues(alpha: 0.8),
                                 ),
                               ),
