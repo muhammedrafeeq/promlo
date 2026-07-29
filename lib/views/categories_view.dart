@@ -79,7 +79,7 @@ class _CategoriesViewState extends State<CategoriesView> {
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: isDesktop ? 3 : (isTablet ? 2 : 2),
+            crossAxisCount: isDesktop ? 3 : (isTablet ? 2 : 1),
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
             childAspectRatio: 2.2,
@@ -169,12 +169,14 @@ class _CategoriesViewState extends State<CategoriesView> {
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
                                     color: Colors.white)),
-                            Text(meta.description,
-                                style: GoogleFonts.inter(
-                                    fontSize: 10,
-                                    color: Colors.white.withValues(alpha: 0.75)),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis),
+                            Flexible(
+                              child: Text(meta.description,
+                                  style: GoogleFonts.inter(
+                                      fontSize: 10,
+                                      color: Colors.white.withValues(alpha: 0.75)),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
+                            ),
                           ],
                         ),
                       ),

@@ -14,7 +14,7 @@ class MobileBottomNav extends StatelessWidget {
 
     return SafeArea(
       child: Container(
-        height: 72,
+        height: kBottomNavigationBarHeight + 16,
         decoration: BoxDecoration(
           color: colors.surfaceContainerLow.withValues(alpha: 0.85),
           border: Border(

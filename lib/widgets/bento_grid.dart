@@ -46,15 +46,20 @@ class BentoGrid extends StatelessWidget {
         const SizedBox(height: 16),
         // Row 2: Grid of remaining cards
         if (prompts.length > 2)
-          Wrap(
-            spacing: 16,
-            runSpacing: 16,
-            children: prompts.skip(2).map((prompt) {
-              return SizedBox(
-                width: 380,
-                child: PromptCard(prompt: prompt),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final cardWidth = (constraints.maxWidth - 16) / 2;
+              return Wrap(
+                spacing: 16,
+                runSpacing: 16,
+                children: prompts.skip(2).map((prompt) {
+                  return SizedBox(
+                    width: cardWidth.clamp(200.0, 380.0),
+                    child: PromptCard(prompt: prompt),
+                  );
+                }).toList(),
               );
-            }).toList(),
+            },
           ),
       ],
     );

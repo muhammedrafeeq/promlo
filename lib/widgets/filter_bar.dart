@@ -12,7 +12,7 @@ class FilterBar extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= 600;
+        final isWide = constraints.maxWidth >= 640;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

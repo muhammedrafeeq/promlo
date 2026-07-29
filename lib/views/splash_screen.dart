@@ -139,8 +139,8 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Opacity(
                     opacity: _glowOpacity.value * 0.5,
                     child: Container(
-                      width: 280,
-                      height: 280,
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      height: MediaQuery.of(context).size.width * 0.7,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
@@ -158,8 +158,8 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Opacity(
                     opacity: _glowOpacity.value * 0.3,
                     child: Container(
-                      width: 200,
-                      height: 200,
+                      width: MediaQuery.of(context).size.width * 0.5,
+                      height: MediaQuery.of(context).size.width * 0.5,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: RadialGradient(

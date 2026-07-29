@@ -212,8 +212,8 @@ class _PromptDetailsViewState extends State<PromptDetailsView> {
           Positioned(
             top: 0,
             left: 0,
-            width: 350,
-            height: 350,
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: MediaQuery.of(context).size.width * 0.8,
             child: Container(
               decoration: BoxDecoration(
                 gradient: RadialGradient(
@@ -228,8 +228,8 @@ class _PromptDetailsViewState extends State<PromptDetailsView> {
           Positioned(
             bottom: 0,
             right: 0,
-            width: 350,
-            height: 350,
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: MediaQuery.of(context).size.width * 0.8,
             child: Container(
               decoration: BoxDecoration(
                 gradient: RadialGradient(
@@ -297,7 +297,7 @@ class _PromptDetailsViewState extends State<PromptDetailsView> {
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   padding: EdgeInsets.symmetric(
-                    horizontal: isDesktop ? 16 : 16,
+                    horizontal: isDesktop ? 24 : 12,
                     vertical: 24,
                   ),
                   child: Center(

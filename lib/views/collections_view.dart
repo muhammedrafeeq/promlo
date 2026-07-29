@@ -64,7 +64,7 @@ class CollectionsView extends StatelessWidget {
   Widget _grid(MarketplaceProvider provider, AppColors colors, BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width >= 1024;
     final isTablet = MediaQuery.of(context).size.width >= 640 && !isDesktop;
-    final cols = isDesktop ? 3 : (isTablet ? 2 : 2);
+    final cols = isDesktop ? 3 : (isTablet ? 2 : 1);
 
     return GridView.builder(
       shrinkWrap: true,
@@ -74,7 +74,7 @@ class CollectionsView extends StatelessWidget {
         crossAxisCount: cols,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
-        mainAxisExtent: 160,
+        mainAxisExtent: isDesktop ? 200 : (isTablet ? 180 : 160),
       ),
       itemBuilder: (_, i) {
         final col = provider.collections[i];
@@ -188,7 +188,7 @@ class CollectionsView extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 32),
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 340),
+          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width > 400 ? 340 : double.infinity),
           padding: const EdgeInsets.all(40),
           decoration: BoxDecoration(
             color: colors.cardGlassBg,

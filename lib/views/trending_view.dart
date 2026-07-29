@@ -187,7 +187,10 @@ class _TrendingViewState extends State<TrendingView> {
                           ),
                         ),
                         Padding(
-                          padding: EdgeInsets.all(isDesktop ? 32 : 24),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isDesktop ? 32 : (isTablet ? 20 : 14),
+                            vertical: isDesktop ? 32 : 20,
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

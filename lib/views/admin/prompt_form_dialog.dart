@@ -122,7 +122,9 @@ class _PromptFormDialogState extends State<PromptFormDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: 640,
+          maxWidth: MediaQuery.of(context).size.width > 680
+              ? 640
+              : MediaQuery.of(context).size.width - 32,
           maxHeight: MediaQuery.of(context).size.height * 0.88,
           minWidth: 0,
         ),
