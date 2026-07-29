@@ -268,6 +268,7 @@ class MarketplaceProvider extends ChangeNotifier {
       _collections[i] = _collections[i].copyWith(promptIds: updated);
       notifyListeners();
       _savePrefs();
+      _adjustBookmarks(promptId, 1);
     }
   }
 
@@ -278,6 +279,7 @@ class MarketplaceProvider extends ChangeNotifier {
     _collections[i] = _collections[i].copyWith(promptIds: updated);
     notifyListeners();
     _savePrefs();
+    _adjustBookmarks(promptId, -1);
   }
 
   void toggleInCollection(String promptId, String collectionId) {
@@ -286,6 +288,22 @@ class MarketplaceProvider extends ChangeNotifier {
     } else {
       addToCollection(promptId, collectionId);
     }
+  }
+
+  Future<void> _adjustBookmarks(String promptId, int delta) async {
+    try {
+      final row = await Supabase.instance.client
+          .from('prompts')
+          .select('bookmarks_count')
+          .eq('id', promptId)
+          .single();
+      final current = (row['bookmarks_count'] as num?)?.toInt() ?? 0;
+      final next = (current + delta).clamp(0, 999999);
+      await Supabase.instance.client
+          .from('prompts')
+          .update({'bookmarks_count': next})
+          .eq('id', promptId);
+    } catch (_) {}
   }
 
   // Keep toggleSave pointing to default collection for backward compat
@@ -328,5 +346,43 @@ class MarketplaceProvider extends ChangeNotifier {
   void addPrompt(PromptItem p)    { _prompts.insert(0, p); notifyListeners(); }
   void openPromptDetails(PromptItem p) { _selectedPromptDetails = p; notifyListeners(); }
   void closePromptDetails()            { _selectedPromptDetails = null; notifyListeners(); }
+
+  void updatePromptCounts(String id, {int? likes, String? viewsCount, int? bookmarksCount}) {
+    final i = _prompts.indexWhere((p) => p.id == id);
+    if (i == -1) return;
+    final p = _prompts[i];
+    _prompts[i] = PromptItem(
+      id: p.id,
+      title: p.title,
+      description: p.description,
+      fullPrompt: p.fullPrompt,
+      category: p.category,
+      model: p.model,
+      likes: likes ?? p.likes,
+      likesFormatted: p.likesFormatted,
+      viewsCount: viewsCount ?? p.viewsCount,
+      runsCount: p.runsCount,
+      usageCount: p.usageCount,
+      matchScore: p.matchScore,
+      isFeatured: p.isFeatured,
+      isTrendingNow: p.isTrendingNow,
+      tags: p.tags,
+      imageUrl: p.imageUrl,
+      creator: p.creator,
+      parameters: p.parameters,
+      codeSnippet: p.codeSnippet,
+      avatars: p.avatars,
+      howToUse: p.howToUse,
+      variants: p.variants,
+      bentoSpan: p.bentoSpan,
+      price: p.price,
+      rating: p.rating,
+      reviewCount: p.reviewCount,
+    );
+    if (_selectedPromptDetails?.id == id) {
+      _selectedPromptDetails = _prompts[i];
+    }
+    notifyListeners();
+  }
 
 }

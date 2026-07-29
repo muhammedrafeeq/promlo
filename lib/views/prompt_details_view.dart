@@ -33,10 +33,38 @@ class _PromptDetailsViewState extends State<PromptDetailsView> {
   @override
   void initState() {
     super.initState();
-    _localLikes = widget.prompt.likes;
-    _localViews = _parseCount(widget.prompt.viewsCount);
-    _incrementViews();
+    _fetchCounts();
     _subscribeRealtime();
+  }
+
+  Future<void> _fetchCounts() async {
+    try {
+      final row = await Supabase.instance.client
+          .from('prompts')
+          .select('likes, views_count, bookmarks_count')
+          .eq('id', widget.prompt.id)
+          .single();
+      if (!mounted) return;
+      final views = _parseCount((row['views_count'] ?? '0').toString());
+      final likes = (row['likes'] as num?)?.toInt() ?? 0;
+      setState(() {
+        _localLikes = likes;
+        _localViews = views;
+        _localBookmarks = (row['bookmarks_count'] as num?)?.toInt() ?? 0;
+      });
+      // increment view count
+      final newViews = views + 1;
+      await Supabase.instance.client
+          .from('prompts')
+          .update({'views_count': '$newViews'})
+          .eq('id', widget.prompt.id);
+      if (mounted) {
+        setState(() => _localViews = newViews);
+        // sync provider list so cards reflect updated view count
+        Provider.of<MarketplaceProvider>(context, listen: false)
+            .updatePromptCounts(widget.prompt.id, viewsCount: '$newViews');
+      }
+    } catch (_) {}
   }
 
   @override
@@ -58,17 +86,6 @@ class _PromptDetailsViewState extends State<PromptDetailsView> {
     return '$n';
   }
 
-  Future<void> _incrementViews() async {
-    try {
-      final newViews = _localViews + 1;
-      await Supabase.instance.client
-          .from('prompts')
-          .update({'views_count': '$newViews'})
-          .eq('id', widget.prompt.id);
-      if (mounted) setState(() => _localViews = newViews);
-    } catch (_) {}
-  }
-
   void _subscribeRealtime() {
     _realtimeChannel = Supabase.instance.client
         .channel('prompt_detail_${widget.prompt.id}')
@@ -84,11 +101,17 @@ class _PromptDetailsViewState extends State<PromptDetailsView> {
           callback: (payload) {
             if (!mounted) return;
             final r = payload.newRecord;
+            final newLikes = (r['likes'] as num?)?.toInt() ?? _localLikes;
+            final newViewsStr = (r['views_count'] ?? '').toString();
+            final newViews = newViewsStr.isNotEmpty ? _parseCount(newViewsStr) : _localViews;
+            final newBookmarks = (r['bookmarks_count'] as num?)?.toInt() ?? _localBookmarks;
             setState(() {
-              _localLikes = (r['likes'] as num?)?.toInt() ?? _localLikes;
-              _localViews = _parseCount((r['views_count'] ?? '').toString());
-              _localBookmarks = (r['bookmarks_count'] as num?)?.toInt() ?? _localBookmarks;
+              _localLikes = newLikes;
+              _localViews = newViews;
+              _localBookmarks = newBookmarks;
             });
+            Provider.of<MarketplaceProvider>(context, listen: false)
+                .updatePromptCounts(widget.prompt.id, likes: newLikes, viewsCount: newViewsStr);
           },
         )
         .subscribe((status, [error]) {
@@ -110,6 +133,10 @@ class _PromptDetailsViewState extends State<PromptDetailsView> {
           .from('prompts')
           .update({'likes': newLikes})
           .eq('id', widget.prompt.id);
+      if (mounted) {
+        Provider.of<MarketplaceProvider>(context, listen: false)
+            .updatePromptCounts(widget.prompt.id, likes: newLikes);
+      }
     } catch (_) {
       if (mounted) setState(() { _liked = wasLiked; _localLikes = newLikes + (wasLiked ? 1 : -1); });
     }
