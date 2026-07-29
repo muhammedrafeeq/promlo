@@ -15,11 +15,14 @@ class TopHeader extends StatelessWidget implements PreferredSizeWidget {
     final colors = AppColors.of(context);
     final provider = Provider.of<MarketplaceProvider>(context);
     final isDesktop = MediaQuery.of(context).size.width >= 768;
+    final statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Container(
-      height: preferredSize.height,
-      padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 32 : 16,
+      height: preferredSize.height + statusBarHeight,
+      padding: EdgeInsets.only(
+        top: statusBarHeight,
+        left: isDesktop ? 32 : 16,
+        right: isDesktop ? 32 : 16,
       ),
       decoration: BoxDecoration(
         color: colors.background.withValues(alpha: 0.8),
