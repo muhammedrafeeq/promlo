@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/marketplace_provider.dart';
 import '../theme/app_theme.dart';
+import '../dialogs/admin_pin_dialog.dart';
 
 class TopHeader extends StatelessWidget implements PreferredSizeWidget {
   const TopHeader({super.key});
@@ -130,32 +131,40 @@ class TopHeader extends StatelessWidget implements PreferredSizeWidget {
               ),
               const SizedBox(width: 2),
 
-              // Glowing User Profile Avatar matching HTML design
-              Container(
-                width: 40,
-                height: 40,
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: colors.primary.withValues(alpha: 0.4),
-                    width: 1.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colors.primary.withValues(alpha: 0.2),
-                      blurRadius: 8,
+              // Glowing User Profile Avatar — long-press to open Admin
+              GestureDetector(
+                onLongPress: () async {
+                  final granted = await AdminPinDialog.show(context);
+                  if (granted && context.mounted) {
+                    Navigator.pushNamed(context, '/admin');
+                  }
+                },
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: colors.primary.withValues(alpha: 0.4),
+                      width: 1.5,
                     ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.network(
-                    'https://lh3.googleusercontent.com/aida-public/AB6AXuDmuUirJHpRCeIepCurZyWxJshLsHRVOLjmG9hQeQpZgWxm0f-LuLdiDSCITmti5CBP6SRzMdgSyXp4AheHxJYlRtTEtupWEGkBcMieQdaEu_Pia2gMBuA10S9o3z9Dcp5TmVFv0fJfP49U0FPIfoox0c5CwIE9meh3kLL0HUTr57Hruo9xmK5e2FsDovZK1EV-pnEckUoeDkRcfJEjqjzgE3xSfuASd-r9YCZr7BJ-ODNRSiCLt5LJ1bhcO_mIjOPZD1lu3gj_PQ8',
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: colors.primaryContainer,
-                      child: const Icon(Icons.person, color: Colors.white, size: 20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colors.primary.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.network(
+                      'https://lh3.googleusercontent.com/aida-public/AB6AXuDmuUirJHpRCeIepCurZyWxJshLsHRVOLjmG9hQeQpZgWxm0f-LuLdiDSCITmti5CBP6SRzMdgSyXp4AheHxJYlRtTEtupWEGkBcMieQdaEu_Pia2gMBuA10S9o3z9Dcp5TmVFv0fJfP49U0FPIfoox0c5CwIE9meh3kLL0HUTr57Hruo9xmK5e2FsDovZK1EV-pnEckUoeDkRcfJEjqjzgE3xSfuASd-r9YCZr7BJ-ODNRSiCLt5LJ1bhcO_mIjOPZD1lu3gj_PQ8',
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: colors.primaryContainer,
+                        child: const Icon(Icons.person, color: Colors.white, size: 20),
+                      ),
                     ),
                   ),
                 ),
