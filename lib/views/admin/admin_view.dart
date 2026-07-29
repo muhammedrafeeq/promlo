@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/supabase_service.dart';
 import '../../theme/app_theme.dart';
 import 'prompt_form_dialog.dart';
@@ -13,6 +15,14 @@ class AdminView extends StatefulWidget {
 }
 
 class _AdminViewState extends State<AdminView> {
+  // ── PIN gate ─────────────────────────────────────────────────
+  bool _pinVerified = false;
+  final _pinControllers = List.generate(4, (_) => TextEditingController());
+  final _pinFocusNodes  = List.generate(4, (_) => FocusNode());
+  bool _pinLoading = false;
+  String? _pinError;
+
+  // ── Admin content ─────────────────────────────────────────────
   List<Map<String, dynamic>> _prompts = [];
   bool _loading = true;
   String? _error;
@@ -21,7 +31,60 @@ class _AdminViewState extends State<AdminView> {
   @override
   void initState() {
     super.initState();
-    _load();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _pinFocusNodes[0].requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    for (final c in _pinControllers) { c.dispose(); }
+    for (final f in _pinFocusNodes)  { f.dispose(); }
+    super.dispose();
+  }
+
+  String get _enteredPin => _pinControllers.map((c) => c.text).join();
+
+  void _onPinDigit(int index, String value) {
+    if (value.length > 1) _pinControllers[index].text = value[value.length - 1];
+    if (value.isNotEmpty && index < 3) {
+      _pinFocusNodes[index + 1].requestFocus();
+    }
+    if (_enteredPin.length == 4) _verifyPin();
+  }
+
+  void _onPinBackspace(int index) {
+    if (_pinControllers[index].text.isEmpty && index > 0) {
+      _pinControllers[index - 1].clear();
+      _pinFocusNodes[index - 1].requestFocus();
+    }
+  }
+
+  Future<void> _verifyPin() async {
+    if (_pinLoading) return;
+    setState(() { _pinLoading = true; _pinError = null; });
+    try {
+      final row = await Supabase.instance.client
+          .from('app_config')
+          .select('value')
+          .eq('key', 'admin_pin')
+          .single();
+      if (!mounted) return;
+      if (_enteredPin == (row['value']?.toString() ?? '')) {
+        setState(() { _pinVerified = true; });
+        _load();
+      } else {
+        for (final c in _pinControllers) { c.clear(); }
+        _pinFocusNodes[0].requestFocus();
+        setState(() { _pinLoading = false; _pinError = 'Incorrect PIN. Try again.'; });
+      }
+    } catch (_) {
+      if (mounted) {
+        for (final c in _pinControllers) { c.clear(); }
+        _pinFocusNodes[0].requestFocus();
+        setState(() { _pinLoading = false; _pinError = 'Could not verify PIN. Check connection.'; });
+      }
+    }
   }
 
   Future<void> _load() async {
@@ -85,6 +148,102 @@ class _AdminViewState extends State<AdminView> {
       );
     }
     final colors = AppColors.of(context);
+
+    if (!_pinVerified) {
+      return Scaffold(
+        backgroundColor: colors.background,
+        appBar: AppBar(
+          backgroundColor: colors.surfaceContainer,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_rounded, color: colors.onSurface),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text('Admin Access',
+              style: GoogleFonts.sora(fontWeight: FontWeight.w700, fontSize: 18, color: colors.primary)),
+        ),
+        body: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(32),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 360),
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: colors.cardGlassBorder),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: colors.primary.withValues(alpha: 0.12),
+                      border: Border.all(color: colors.primary.withValues(alpha: 0.3)),
+                    ),
+                    child: Icon(Icons.admin_panel_settings_rounded, color: colors.primary, size: 34),
+                  ),
+                  const SizedBox(height: 24),
+                  Text('Enter Admin PIN',
+                      style: GoogleFonts.sora(fontSize: 20, fontWeight: FontWeight.w700, color: colors.onSurface)),
+                  const SizedBox(height: 8),
+                  Text('Enter your 4-digit PIN to access the admin panel',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(fontSize: 13, color: colors.onSurfaceVariant)),
+                  const SizedBox(height: 32),
+
+                  // PIN boxes
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(4, (i) => _AdminPinBox(
+                      controller: _pinControllers[i],
+                      focusNode: _pinFocusNodes[i],
+                      hasError: _pinError != null,
+                      enabled: !_pinLoading,
+                      onChanged: (v) => _onPinDigit(i, v),
+                      onBackspace: () => _onPinBackspace(i),
+                      colors: colors,
+                    )),
+                  ),
+
+                  // Error message
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    child: _pinError != null
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: 16),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.error_outline_rounded, size: 14, color: Colors.redAccent),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(_pinError!,
+                                      style: const TextStyle(fontSize: 12, color: Colors.redAccent)),
+                                ),
+                              ],
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+
+                  if (_pinLoading) ...[
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: 24, height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: colors.primary),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -275,6 +434,74 @@ class _AdminViewState extends State<AdminView> {
           ),
         ),
       )).toList(),
+    );
+  }
+}
+
+class _AdminPinBox extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final bool hasError;
+  final bool enabled;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onBackspace;
+  final AppColors colors;
+
+  const _AdminPinBox({
+    required this.controller,
+    required this.focusNode,
+    required this.hasError,
+    required this.enabled,
+    required this.onChanged,
+    required this.onBackspace,
+    required this.colors,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 56,
+      height: 64,
+      margin: const EdgeInsets.symmetric(horizontal: 6),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: hasError
+              ? Colors.redAccent.withValues(alpha: 0.6)
+              : focusNode.hasFocus
+                  ? colors.primary
+                  : colors.outline.withValues(alpha: 0.3),
+          width: focusNode.hasFocus ? 2 : 1,
+        ),
+      ),
+      child: KeyboardListener(
+        focusNode: FocusNode(),
+        onKeyEvent: (event) {
+          if (event is KeyDownEvent &&
+              event.logicalKey == LogicalKeyboardKey.backspace) {
+            onBackspace();
+          }
+        },
+        child: TextField(
+          controller: controller,
+          focusNode: focusNode,
+          enabled: enabled,
+          textAlign: TextAlign.center,
+          obscureText: true,
+          obscuringCharacter: '●',
+          keyboardType: TextInputType.number,
+          maxLength: 1,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          style: GoogleFonts.sora(
+              fontSize: 22, fontWeight: FontWeight.w700, color: colors.onSurface),
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+            counterText: '',
+          ),
+          onChanged: onChanged,
+        ),
+      ),
     );
   }
 }

@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../providers/marketplace_provider.dart';
 import '../theme/app_theme.dart';
-import '../dialogs/admin_pin_dialog.dart';
 
 class TopHeader extends StatelessWidget implements PreferredSizeWidget {
   const TopHeader({super.key});
@@ -131,15 +130,8 @@ class TopHeader extends StatelessWidget implements PreferredSizeWidget {
               ),
               const SizedBox(width: 2),
 
-              // Glowing User Profile Avatar — long-press to open Admin
-              GestureDetector(
-                onLongPress: () async {
-                  final granted = await AdminPinDialog.show(context);
-                  if (granted && context.mounted) {
-                    Navigator.pushNamed(context, '/admin');
-                  }
-                },
-                child: Container(
+              // Glowing User Profile Avatar
+              Container(
                   width: 40,
                   height: 40,
                   padding: const EdgeInsets.all(2),
@@ -168,7 +160,6 @@ class TopHeader extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   ),
                 ),
-              ),
             ],
           ),
         ],
