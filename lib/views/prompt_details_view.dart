@@ -42,7 +42,7 @@ class _PromptDetailsViewState extends State<PromptDetailsView> {
     try {
       final row = await Supabase.instance.client
           .from('prompts')
-          .select('likes, views_count, bookmarks_count')
+          .select('likes, views_count')
           .eq('id', widget.prompt.id)
           .single();
       if (!mounted) return;
@@ -51,21 +51,22 @@ class _PromptDetailsViewState extends State<PromptDetailsView> {
       setState(() {
         _localLikes = likes;
         _localViews = views;
-        _localBookmarks = (row['bookmarks_count'] as num?)?.toInt() ?? 0;
       });
       // increment view count
       final newViews = views + 1;
+      final newViewsStr = _formatCount(newViews);
       await Supabase.instance.client
           .from('prompts')
-          .update({'views_count': '$newViews'})
+          .update({'views_count': newViewsStr})
           .eq('id', widget.prompt.id);
       if (mounted) {
         setState(() => _localViews = newViews);
-        // sync provider list so cards reflect updated view count
         Provider.of<MarketplaceProvider>(context, listen: false)
-            .updatePromptCounts(widget.prompt.id, viewsCount: '$newViews');
+            .updatePromptCounts(widget.prompt.id, viewsCount: newViewsStr);
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('_fetchCounts error: $e');
+    }
   }
 
   @override
