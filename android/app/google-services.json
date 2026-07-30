@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "617592449601",
+    "project_id": "promlo",
+    "storage_bucket": "promlo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:617592449601:android:d3b1be9cb52d8abb0874c0",
+        "android_client_info": {
+          "package_name": "com.zerbit.promlo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCy25tUkPFbV4o7nMGWDBVU6ZLpSEe4KWc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

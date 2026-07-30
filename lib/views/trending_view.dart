@@ -7,6 +7,7 @@ import '../models/prompt_model.dart';
 import '../providers/marketplace_provider.dart';
 import '../widgets/prompt_card.dart';
 import '../theme/app_theme.dart';
+import '../services/analytics_service.dart';
 
 class TrendingView extends StatefulWidget {
   const TrendingView({super.key});
@@ -258,7 +259,10 @@ class _TrendingViewState extends State<TrendingView> {
                     });
                   },
                   onSubmitted: (val) {
-                    if (val.trim().isNotEmpty) provider.addRecentSearch(val.trim());
+                    if (val.trim().isNotEmpty) {
+                      provider.addRecentSearch(val.trim());
+                      AnalyticsService.logSearch(val.trim());
+                    }
                   },
                   style: TextStyle(
                     color: colors.onSurface,

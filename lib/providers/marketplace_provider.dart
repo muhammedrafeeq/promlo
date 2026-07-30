@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/prompt_model.dart';
 import '../models/collection_model.dart';
+import '../services/analytics_service.dart';
 
 enum SortOrder { trending, mostLiked, mostViewed, newest }
 
@@ -322,6 +323,7 @@ class MarketplaceProvider extends ChangeNotifier {
     _activeTabIndex = index;
     _selectedPromptDetails = null;
     notifyListeners();
+    AnalyticsService.logTabSwitch(index);
   }
 
   void setActiveCategory(Category category) { _activeCategory = category; notifyListeners(); }
@@ -344,7 +346,15 @@ class MarketplaceProvider extends ChangeNotifier {
   void toggleTheme() { _isDarkMode = !_isDarkMode; notifyListeners(); _savePrefs(); }
 
   void addPrompt(PromptItem p)    { _prompts.insert(0, p); notifyListeners(); }
-  void openPromptDetails(PromptItem p) { _selectedPromptDetails = p; notifyListeners(); }
+  void openPromptDetails(PromptItem p) {
+    _selectedPromptDetails = p;
+    notifyListeners();
+    AnalyticsService.logPromptView(
+      promptId: p.id,
+      promptTitle: p.title,
+      category: p.category.name,
+    );
+  }
   void closePromptDetails()            { _selectedPromptDetails = null; notifyListeners(); }
 
   void updatePromptCounts(String id, {int? likes, String? viewsCount, int? bookmarksCount}) {

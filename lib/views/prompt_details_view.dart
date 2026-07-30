@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/prompt_model.dart';
 import '../providers/marketplace_provider.dart';
 import '../theme/app_theme.dart';
+import '../services/analytics_service.dart';
 
 class PromptDetailsView extends StatefulWidget {
   final PromptItem prompt;
@@ -128,6 +129,7 @@ class _PromptDetailsViewState extends State<PromptDetailsView> {
       _liked = !wasLiked;
       _localLikes = newLikes;
     });
+    AnalyticsService.logPromptLike(promptId: widget.prompt.id, isLiked: !wasLiked);
     try {
       await Supabase.instance.client
           .from('prompts')
@@ -196,6 +198,10 @@ class _PromptDetailsViewState extends State<PromptDetailsView> {
   void _copyPromptToClipboard() {
     final colors = AppColors.of(context);
     Clipboard.setData(ClipboardData(text: widget.prompt.fullPrompt));
+    AnalyticsService.logPromptCopy(
+      promptId: widget.prompt.id,
+      category: widget.prompt.category.name,
+    );
     setState(() => _isCopied = true);
 
     ScaffoldMessenger.of(context).hideCurrentSnackBar();

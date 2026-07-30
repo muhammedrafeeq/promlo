@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'firebase_options.dart';
 import 'theme/app_theme.dart';
 import 'providers/marketplace_provider.dart';
 import 'views/splash_screen.dart';
@@ -9,6 +13,7 @@ import 'views/categories_view.dart';
 import 'views/collections_view.dart';
 import 'views/prompt_details_view.dart';
 import 'views/admin/admin_view.dart';
+import 'services/analytics_service.dart';
 
 import 'widgets/top_header.dart';
 import 'widgets/mobile_bottom_nav.dart';
@@ -20,7 +25,17 @@ const _supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhY
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
+
+  if (defaultTargetPlatform == TargetPlatform.android) {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    PlatformDispatcher.instance.onError = (error, stack) {
+      AnalyticsService.logError(error, stack, fatal: true);
+      return true;
+    };
+  }
+
+  await Supabase.initialize(url: _supabaseUrl, publishableKey: _supabaseAnonKey);
   runApp(const PromloApp());
 }
 
