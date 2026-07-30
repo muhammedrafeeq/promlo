@@ -109,26 +109,17 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Decode keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      - name: Decode keystore & write key.properties
         run: |
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > $RUNNER_TEMP/release.jks
-          echo "KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> $GITHUB_ENV
-
-      - name: Verify keystore
-        run: |
-          echo "File size: $(wc -c < $RUNNER_TEMP/release.jks) bytes"
-          keytool -list -keystore $RUNNER_TEMP/release.jks \
-            -storepass "${{ secrets.STORE_PASSWORD }}" \
-            -v 2>&1 | head -20
+          printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > $RUNNER_TEMP/release.jks
+          cat > android/key.properties <<EOF
+          storeFile=$RUNNER_TEMP/release.jks
+          storePassword=${{ secrets.STORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
 
       - name: Build release AAB
-        env:
-          KEYSTORE_PATH: ${{ env.KEYSTORE_PATH }}
-          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           flutter build appbundle --release \
             --build-name=${{ steps.version.outputs.name }} \

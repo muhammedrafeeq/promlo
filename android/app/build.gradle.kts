@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,6 +7,12 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+}
+
+val keyPropertiesFile = rootProject.file("key.properties")
+val keyProperties = Properties()
+if (keyPropertiesFile.exists()) {
+    keyProperties.load(keyPropertiesFile.inputStream())
 }
 
 android {
@@ -23,12 +31,11 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystorePath = System.getenv("KEYSTORE_PATH")
-            if (keystorePath != null) {
-                storeFile = file(keystorePath)
-                storePassword = System.getenv("STORE_PASSWORD")
-                keyAlias = System.getenv("KEY_ALIAS")
-                keyPassword = System.getenv("KEY_PASSWORD")
+            if (keyPropertiesFile.exists()) {
+                storeFile = file(keyProperties["storeFile"] as String)
+                storePassword = keyProperties["storePassword"] as String
+                keyAlias = keyProperties["keyAlias"] as String
+                keyPassword = keyProperties["keyPassword"] as String
             }
         }
     }
@@ -43,7 +50,7 @@ android {
 
     buildTypes {
         release {
-            signingConfig = if (System.getenv("KEYSTORE_PATH") != null)
+            signingConfig = if (keyPropertiesFile.exists())
                 signingConfigs.getByName("release")
             else
                 signingConfigs.getByName("debug")
