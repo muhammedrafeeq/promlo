@@ -3,8 +3,6 @@ name: CI
 on:
   push:
     branches: [main]
-    tags:
-      - 'v*.*.*'          # triggers Play Store deploy, e.g. v1.2.0
 
 jobs:
   # ── Deploy Flutter web to Vercel ─────────────────────────────
@@ -73,26 +71,26 @@ jobs:
           path: build/app/outputs/flutter-apk/app-*-release.apk
           retention-days: 30
 
-  # ── Build signed AAB & deploy to Play Store ──────────────────
-  deploy-play-store:
-    name: Deploy to Play Store
+  # ── Build signed AAB on every main push ─────────────────────
+  build-aab:
+    name: Build Android AAB
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0        # needed for commit count versioning
+          fetch-depth: 0        # needed for commit count
 
-      - name: Extract version from tag
+      - name: Compute version
         id: version
         run: |
-          # versionName = tag without leading 'v'  (e.g. v1.2.0 → 1.2.0)
-          VERSION_NAME="${GITHUB_REF_NAME#v}"
-          # versionCode = total commit count (auto-incrementing integer)
+          # versionCode = total commit count (increments on every push)
           VERSION_CODE=$(git rev-list --count HEAD)
-          echo "name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          # versionName = base version from pubspec + commit count suffix
+          BASE=$(grep '^version:' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1)
+          VERSION_NAME="${BASE}+${VERSION_CODE}"
           echo "code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "▸ versionName=$VERSION_NAME  versionCode=$VERSION_CODE"
 
       - name: Set up Java
@@ -129,27 +127,16 @@ jobs:
             --obfuscate \
             --split-debug-info=build/debug-info
 
-      - name: Upload AAB artifact
+      - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
-          name: promlo-${{ steps.version.outputs.name }}-aab
+          name: promlo-${{ steps.version.outputs.name }}
           path: build/app/outputs/bundle/release/app-release.aab
           retention-days: 90
 
-      - name: Upload debug symbols artifact
+      - name: Upload debug symbols
         uses: actions/upload-artifact@v4
         with:
-          name: promlo-${{ steps.version.outputs.name }}-debug-symbols
+          name: promlo-${{ steps.version.outputs.name }}-symbols
           path: build/debug-info/
           retention-days: 90
-
-      - name: Deploy to Play Store (internal track)
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_JSON_KEY }}
-          packageName: com.zerbit.promlo
-          releaseFiles: build/app/outputs/bundle/release/app-release.aab
-          track: internal
-          status: completed
-          releaseName: ${{ steps.version.outputs.name }}
-          debugSymbols: build/debug-info/

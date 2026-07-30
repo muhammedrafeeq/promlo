@@ -43,12 +43,10 @@ android {
 
     buildTypes {
         release {
-            val keystorePath = System.getenv("KEYSTORE_PATH")
-            signingConfig = if (keystorePath != null) {
+            signingConfig = if (System.getenv("KEYSTORE_PATH") != null)
                 signingConfigs.getByName("release")
-            } else {
+            else
                 signingConfigs.getByName("debug")
-            }
         }
     }
 }
