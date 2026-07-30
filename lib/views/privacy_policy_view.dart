@@ -110,7 +110,7 @@ class PrivacyPolicyView extends StatelessWidget {
                   icon: Icons.mail_outline_rounded,
                   title: '9. Contact Us',
                   body:
-                      'If you have questions or concerns about this Privacy Policy or how we handle your data, please reach out to us at:\n\nprivacy@promlo.app\n\nWe aim to respond to all enquiries within 5 business days.',
+                      'If you have questions or concerns about this Privacy Policy or how we handle your data, please reach out to us at:\n\nzerbitsolutions@gmail.com\n\nWe aim to respond to all enquiries within 5 business days.',
                 ),
                 const SizedBox(height: 40),
                 _buildFooterNote(colors),
