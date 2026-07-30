@@ -3,12 +3,15 @@ name: CI
 on:
   push:
     branches: [main]
+    tags:
+      - 'v*.*.*'          # triggers Play Store deploy, e.g. v1.2.0
 
 jobs:
   # ── Deploy Flutter web to Vercel ─────────────────────────────
   deploy-web:
     name: Build & Deploy Web
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - uses: actions/checkout@v4
@@ -35,10 +38,11 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
-  # ── Build release APK ────────────────────────────────────────
+  # ── Build release APK (CI smoke test on every main push) ─────
   build-apk:
     name: Build Android APK
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - uses: actions/checkout@v4
@@ -68,3 +72,84 @@ jobs:
           name: promlo-release-apks
           path: build/app/outputs/flutter-apk/app-*-release.apk
           retention-days: 30
+
+  # ── Build signed AAB & deploy to Play Store ──────────────────
+  deploy-play-store:
+    name: Deploy to Play Store
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # needed for commit count versioning
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          # versionName = tag without leading 'v'  (e.g. v1.2.0 → 1.2.0)
+          VERSION_NAME="${GITHUB_REF_NAME#v}"
+          # versionCode = total commit count (auto-incrementing integer)
+          VERSION_CODE=$(git rev-list --count HEAD)
+          echo "name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "▸ versionName=$VERSION_NAME  versionCode=$VERSION_CODE"
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.8'
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > $RUNNER_TEMP/release.jks
+          echo "KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> $GITHUB_ENV
+
+      - name: Build release AAB
+        env:
+          KEYSTORE_PATH: ${{ env.KEYSTORE_PATH }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          flutter build appbundle --release \
+            --build-name=${{ steps.version.outputs.name }} \
+            --build-number=${{ steps.version.outputs.code }} \
+            --obfuscate \
+            --split-debug-info=build/debug-info
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: promlo-${{ steps.version.outputs.name }}-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 90
+
+      - name: Upload debug symbols artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: promlo-${{ steps.version.outputs.name }}-debug-symbols
+          path: build/debug-info/
+          retention-days: 90
+
+      - name: Deploy to Play Store (internal track)
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_JSON_KEY }}
+          packageName: com.zerbit.promlo
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: internal
+          status: completed
+          releaseName: ${{ steps.version.outputs.name }}
+          debugSymbols: build/debug-info/
