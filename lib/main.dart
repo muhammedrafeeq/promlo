@@ -13,6 +13,7 @@ import 'views/categories_view.dart';
 import 'views/collections_view.dart';
 import 'views/prompt_details_view.dart';
 import 'views/admin/admin_view.dart';
+import 'views/privacy_policy_view.dart';
 import 'services/analytics_service.dart';
 
 import 'widgets/top_header.dart';
@@ -57,6 +58,7 @@ class PromloApp extends StatelessWidget {
             home: const SplashScreen(child: MainShellScreen()),
             routes: {
               '/admin': (_) => const AdminView(),
+              '/privacy': (_) => const PrivacyPolicyView(),
             },
           );
         },

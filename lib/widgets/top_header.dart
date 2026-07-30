@@ -117,6 +117,18 @@ class TopHeader extends StatelessWidget implements PreferredSizeWidget {
           // Right: Mobile Search Icon + Profile Avatar
           Row(
             children: [
+              if (isDesktop)
+                TextButton(
+                  onPressed: () => Navigator.pushNamed(context, '/privacy'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: colors.onSurfaceVariant,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                  child: Text(
+                    'Privacy',
+                    style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant),
+                  ),
+                ),
               IconButton(
                 icon: Icon(
                   provider.isDarkMode
@@ -128,38 +140,6 @@ class TopHeader extends StatelessWidget implements PreferredSizeWidget {
                 onPressed: provider.toggleTheme,
                 tooltip: provider.isDarkMode ? 'Light mode' : 'Dark mode',
               ),
-              const SizedBox(width: 2),
-
-              // Glowing User Profile Avatar
-              Container(
-                  width: 40,
-                  height: 40,
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: colors.primary.withValues(alpha: 0.4),
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colors.primary.withValues(alpha: 0.2),
-                        blurRadius: 8,
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.network(
-                      'https://lh3.googleusercontent.com/aida-public/AB6AXuDmuUirJHpRCeIepCurZyWxJshLsHRVOLjmG9hQeQpZgWxm0f-LuLdiDSCITmti5CBP6SRzMdgSyXp4AheHxJYlRtTEtupWEGkBcMieQdaEu_Pia2gMBuA10S9o3z9Dcp5TmVFv0fJfP49U0FPIfoox0c5CwIE9meh3kLL0HUTr57Hruo9xmK5e2FsDovZK1EV-pnEckUoeDkRcfJEjqjzgE3xSfuASd-r9YCZr7BJ-ODNRSiCLt5LJ1bhcO_mIjOPZD1lu3gj_PQ8',
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: colors.primaryContainer,
-                        child: const Icon(Icons.person, color: Colors.white, size: 20),
-                      ),
-                    ),
-                  ),
-                ),
             ],
           ),
         ],
